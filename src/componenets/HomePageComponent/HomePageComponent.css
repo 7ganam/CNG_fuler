@@ -1,0 +1,62 @@
+.scan_qr_button{
+    background: #0089FF;
+border-radius: 50px;
+border: 0px;
+height: 70px;
+/* width: 200px; */
+color: white;
+font-family: 'Nunito', sans-serif;font-style: normal;
+font-weight: bold;
+font-size: 20px;
+line-height: 25px;
+text-align: center;
+letter-spacing: 0.04em;
+
+color: #FFFFFF;
+display: flex;
+flex-direction: row ;
+justify-content: space-between;
+align-items: center;
+
+}
+
+
+.modal-header{
+    background: linear-gradient(125.18deg, #0089FF -0.02%, #5CCCFF 127.1%);
+color: white;
+
+}
+.modal-dialog{
+    max-width: 80vw;
+    margin: 30px auto 0 auto !important;
+    border-radius: 3px 20px 3px 70px !important;
+    overflow: hidden;
+    
+}
+
+.close{
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    border: 0px;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+
+}
+
+.page_title{
+    font-size: 27px;
+    text-transform: uppercase;
+    font-family: 'Nunito', sans-serif;
+    background-color: white;
+    width: 70%;
+    margin: 0px auto 20px auto !important;
+    border-radius: 20px;
+    box-shadow: -4px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.page_sub_title{
+    margin: 0px auto 20px auto !important;
+    width: 85%;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+}
