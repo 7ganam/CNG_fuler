@@ -15,7 +15,6 @@ function HomePageComponent(props) {
 
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
-
   const [PostedCar, setPostedCar] = useState(null);
   const [ScannedQr, setScannedQr] = useState(null);
   const [UpdatedCar, setUpdatedCar] = useState(null);
