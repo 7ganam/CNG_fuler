@@ -10,6 +10,8 @@ import { Alert } from "reactstrap";
 
 import QrComponent from "./QrComponent/QrComponent";
 
+const DispenserIp = "192.168.0.12";
+const DispenserPort = "80";
 function HomePageComponent(props) {
   const maintainance_period = 30; // max time for maintainance gap in days TODO: fetch this value from the db
 
@@ -46,6 +48,21 @@ function HomePageComponent(props) {
     }
   };
 
+  let onOpenDispenser = async () => {
+    try {
+      fetch(`http://${DispenserIp}:${DispenserPort}/?Charger4_ON`);
+    } catch (error) {
+      console.log("sent open request");
+    }
+  };
+  let onCloseDispenser = async () => {
+    try {
+      fetch(`http://${DispenserIp}:${DispenserPort}/?Charger4_OFF`);
+    } catch (error) {
+      console.log("sent open request");
+    }
+    // .then((json) => console.log(json));
+  };
   return (
     <>
       <div style={{}}>
@@ -53,6 +70,21 @@ function HomePageComponent(props) {
           {ScannedQr === PostedCar?.data[0].qr_str ? (
             <Container className="update_maint_date_container">
               {Find_maint_state(PostedCar?.data[0])}
+
+              <Button
+                style={{ height: "50px", width: "80%", marginTop: "20px" }}
+                color="success"
+                onClick={onOpenDispenser}
+              >
+                Open Dispenser
+              </Button>
+              <Button
+                style={{ height: "50px", width: "80%", marginTop: "20px" }}
+                color="warning"
+                onClick={onCloseDispenser}
+              >
+                Close Dispenser
+              </Button>
               <Button
                 style={{ height: "50px", width: "80%", marginTop: "20px" }}
                 color="danger"
