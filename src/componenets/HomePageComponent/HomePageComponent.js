@@ -50,14 +50,14 @@ function HomePageComponent(props) {
 
   let onOpenDispenser = async () => {
     try {
-      fetch(`https://${DispenserIp}:${DispenserPort}/Charger4_ON`);
+      fetch(`https://${DispenserIp}/Charger4_ON`);
     } catch (error) {
       console.log("sent open request");
     }
   };
   let onCloseDispenser = async () => {
     try {
-      fetch(`https://${DispenserIp}:${DispenserPort}/Charger4_OFF`);
+      fetch(`https://${DispenserIp}/Charger4_OFF`);
     } catch (error) {
       console.log("sent open request");
     }
