@@ -11,24 +11,20 @@ import { Alert } from "reactstrap";
 import QrComponent from "./QrComponent/QrComponent";
 
 const DispenserIp = "192.168.0.12";
-const DispenserPort = "80";
 function HomePageComponent(props) {
   const maintainance_period = 30; // max time for maintainance gap in days TODO: fetch this value from the db
 
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
-  const [PostedCar, setPostedCar] = useState(null);
+  const [FetchedCar, setFetchedCar] = useState(null);
+  const [FetchedCarError, setFetchedCarError] = useState(null);
   const [ScannedQr, setScannedQr] = useState(null);
   const [UpdatedCar, setUpdatedCar] = useState(null);
 
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
-  useEffect(() => {
-    console.log(ScannedQr);
-  }, [ScannedQr]);
-
   const onCancel = () => {
-    setPostedCar(null);
+    setFetchedCar(null);
     setScannedQr(null);
     setUpdatedCar(null);
   };
@@ -36,7 +32,6 @@ function HomePageComponent(props) {
   const Find_maint_state = (car) => {
     let str = car.maintenances[car.maintenances.length - 1];
     let date = moment(str);
-    let last_maint_date = date.utc().format("DD-MM-YYYY");
 
     //calculating reamaing days for maintainance
     let current_date = moment();
@@ -67,9 +62,9 @@ function HomePageComponent(props) {
     <>
       <div style={{}}>
         <div>
-          {ScannedQr === PostedCar?.data[0].qr_str ? (
+          {ScannedQr === FetchedCar?.data[0].qr_str ? (
             <Container className="update_maint_date_container">
-              {Find_maint_state(PostedCar?.data[0])}
+              {Find_maint_state(FetchedCar?.data[0])}
 
               <Button
                 style={{ height: "50px", width: "80%", marginTop: "20px" }}
@@ -101,14 +96,18 @@ function HomePageComponent(props) {
                   <div className="page_sub_title">
                     {" "}
                     Enter car's plate info then scan the QR code to check the
-                    car's maintaince date
+                    car's maintenance date
                   </div>
-                  <NewCarFormComponent setPostedCar={setPostedCar} />
+                  <NewCarFormComponent
+                    setFetchedCar={setFetchedCar}
+                    setModal
+                    setFetchedCarError={setFetchedCarError}
+                  />
                 </Col>
                 <Col xs="0" md="1"></Col>
                 <Col xs="12" md="7">
                   <div>
-                    {PostedCar && (
+                    {FetchedCar && (
                       <>
                         <div
                           style={{
@@ -135,12 +134,17 @@ function HomePageComponent(props) {
                           </button>
                         </div>
                         <Modal isOpen={modal} toggle={toggle}>
-                          <ModalHeader toggle={toggle}>Modal title</ModalHeader>
+                          <ModalHeader toggle={toggle}>
+                            Scan the QR code
+                          </ModalHeader>
                           <ModalBody>
                             {!toggle ? (
                               <div>test</div>
                             ) : (
-                              <QrComponent setScannedQr={setScannedQr} />
+                              <QrComponent
+                                setScannedQr={setScannedQr}
+                                setModal={setModal}
+                              />
                             )}
                           </ModalBody>
                           <ModalFooter>
@@ -150,6 +154,19 @@ function HomePageComponent(props) {
                           </ModalFooter>
                         </Modal>
                       </>
+                    )}
+
+                    {ScannedQr && ScannedQr !== FetchedCar?.data[0]?.qr_str && (
+                      <Alert color="danger">
+                        QR doesn't match plate number, the admin was notified by
+                        this incident
+                      </Alert>
+                    )}
+
+                    {FetchedCarError && (
+                      <Alert color="danger">
+                        Couldn't find car in the database
+                      </Alert>
                     )}
                   </div>
                 </Col>

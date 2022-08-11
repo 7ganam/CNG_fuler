@@ -1,17 +1,7 @@
 import React, { useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import {
-  Card,
-  Button,
-  CardHeader,
-  CardFooter,
-  CardBody,
-  CardTitle,
-  CardText,
-} from "reactstrap";
+
 import "./NewCarFormComponent.css";
-import DateView from "react-datepicker";
-import { Container, Row, Col } from "reactstrap";
 
 import { useHttpClient } from "../../hooks/useHttpClient";
 
@@ -22,7 +12,7 @@ function NewCarFormComponent(props) {
   const submit_form = async (fields) => {
     function reverseString(str) {
       return str
-        .split("")
+        .split(" ")
         .sort(() => 1)
         .join("");
     }
@@ -39,11 +29,13 @@ function NewCarFormComponent(props) {
       );
 
       console.log("responseData ", responseData);
-      props.setPostedCar(responseData);
+      props.setFetchedCar(responseData);
       let qr_str = responseData.data[0].qr_str;
       setqr_str(qr_str);
+      props.setFetchedCarError(false);
     } catch (err) {
       console.log(err);
+      props.setFetchedCarError(true);
     }
   };
 
@@ -64,7 +56,7 @@ function NewCarFormComponent(props) {
           // alert('SUCCESS!! :-)\n\n' + JSON.stringify(fields, null, 4))
           submit_form(fields);
         }}
-        render={({ errors, status, touched }) => (
+        render={({ errors, status, touched, setFieldValue, values }) => (
           <Form>
             <div className="plate_card_all">
               <div className="plate_card_top">
@@ -117,9 +109,16 @@ function NewCarFormComponent(props) {
                     }}
                   >
                     <div className="form-group">
-                      <Field
+                      <input
                         name="plate_no"
                         type="text"
+                        value={values.plate_no}
+                        onChange={(x) => {
+                          let noSpaces = x.target.value.replace(/ /g, "");
+                          let lettersArray = noSpaces.split("");
+                          let value = lettersArray.join(" ");
+                          setFieldValue("plate_no", value);
+                        }}
                         className={
                           "plate_input form-control" +
                           (errors.plate_no && touched.plate_no
@@ -139,13 +138,19 @@ function NewCarFormComponent(props) {
                       width: "50%",
                       display: "flex",
                       alignItems: "center",
-                      fontSize: "70px",
                     }}
                   >
                     <div className="form-group">
-                      <Field
+                      <input
                         name="plate_str"
                         type="text"
+                        value={values.plate_str}
+                        onChange={(x) => {
+                          let noSpaces = x.target.value.replace(/ /g, "");
+                          let lettersArray = noSpaces.split("");
+                          let value = lettersArray.join(" ");
+                          setFieldValue("plate_str", value);
+                        }}
                         className={
                           "plate_input form-control" +
                           (errors.plate_str && touched.plate_str
