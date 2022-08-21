@@ -50,6 +50,7 @@ function HomePageComponent(props) {
     //calculating reamaing days for maintainance
     let current_date = moment();
     let date_diff = current_date.diff(date, "days");
+    console.log("car :>> ", car);
     if (date_diff <= (car?.maintenance_period || maintainance_period)) {
       return true;
     } else {
