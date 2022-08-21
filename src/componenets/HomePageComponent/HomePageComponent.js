@@ -36,10 +36,24 @@ function HomePageComponent(props) {
     //calculating reamaing days for maintainance
     let current_date = moment();
     let date_diff = current_date.diff(date, "days");
-    if (date_diff <= maintainance_period) {
+    if (date_diff <= (car?.maintenance_period || maintainance_period)) {
       return <Alert color="success">Car can be charged</Alert>;
     } else {
       return <Alert color="danger">Needs maintainence</Alert>;
+    }
+  };
+
+  const needsMaintenance = (car) => {
+    let str = car.maintenances[car.maintenances.length - 1];
+    let date = moment(str);
+
+    //calculating reamaing days for maintainance
+    let current_date = moment();
+    let date_diff = current_date.diff(date, "days");
+    if (date_diff <= (car?.maintenance_period || maintainance_period)) {
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -66,20 +80,24 @@ function HomePageComponent(props) {
             <Container className="update_maint_date_container">
               {Find_maint_state(FetchedCar?.data[0])}
 
-              <Button
-                style={{ height: "50px", width: "80%", marginTop: "20px" }}
-                color="success"
-                onClick={onOpenDispenser}
-              >
-                Open Dispenser
-              </Button>
-              <Button
-                style={{ height: "50px", width: "80%", marginTop: "20px" }}
-                color="warning"
-                onClick={onCloseDispenser}
-              >
-                Close Dispenser
-              </Button>
+              {FetchedCar?.data[0] && needsMaintenance(FetchedCar?.data[0]) && (
+                <>
+                  <Button
+                    style={{ height: "50px", width: "80%", marginTop: "20px" }}
+                    color="success"
+                    onClick={onOpenDispenser}
+                  >
+                    Open Dispenser
+                  </Button>
+                  <Button
+                    style={{ height: "50px", width: "80%", marginTop: "20px" }}
+                    color="warning"
+                    onClick={onCloseDispenser}
+                  >
+                    Close Dispenser
+                  </Button>
+                </>
+              )}
               <Button
                 style={{ height: "50px", width: "80%", marginTop: "20px" }}
                 color="danger"
