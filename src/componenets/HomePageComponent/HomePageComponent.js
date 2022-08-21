@@ -24,6 +24,10 @@ function HomePageComponent(props) {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   const onCancel = () => {
+    fetch(`https://${DispenserIp}/Charger4_OFF`).catch(
+      console.log("sent open request")
+    );
+
     setFetchedCar(null);
     setScannedQr(null);
     setUpdatedCar(null);
