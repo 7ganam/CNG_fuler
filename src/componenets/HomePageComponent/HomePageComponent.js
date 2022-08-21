@@ -24,8 +24,8 @@ function HomePageComponent(props) {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   const onCancel = () => {
-    fetch(`https://${DispenserIp}/Charger4_OFF`).catch(
-      console.log("sent open request")
+    fetch(`https://${DispenserIp}/Charger4_OFF`).catch((error) =>
+      console.log(error)
     );
 
     setFetchedCar(null);
