@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Label } from "reactstrap";
 import "./HomePageComponent.css";
 import NewCarFormComponent from "./NewCarFormComponent/NewCarFormComponent";
 import { useHttpClient } from "../hooks/useHttpClient";
@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import moment from "moment";
 import { Alert } from "reactstrap";
+import { Formik, Field, Form, ErrorMessage } from "formik";
 
 import QrComponent from "./QrComponent/QrComponent";
 
@@ -23,11 +24,9 @@ function HomePageComponent(props) {
 
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
-  const onCancel = () => {
-    fetch(`https://${DispenserIp}/Charger4_OFF`).catch((error) =>
-      console.log(error)
-    );
+  const [dispenserNo, setDispenserNo] = useState(4);
 
+  const onCancel = () => {
     setFetchedCar(null);
     setScannedQr(null);
     setUpdatedCar(null);
@@ -64,19 +63,29 @@ function HomePageComponent(props) {
 
   let onOpenDispenser = async () => {
     try {
-      fetch(`https://${DispenserIp}/Charger4_ON`);
+      fetch(`https://${DispenserIp}/Charger${dispenserNo}_ON`);
     } catch (error) {
       console.log("sent open request");
     }
   };
-  let onCloseDispenser = async () => {
+  const submit_form = async (fields) => {
+    console.log("FetchedCar :>> ", FetchedCar);
     try {
-      fetch(`https://${DispenserIp}/Charger4_OFF`);
-    } catch (error) {
-      console.log("sent open request");
+      const responseData = await sendRequest(
+        `${process.env.REACT_APP_BACKEND_URL}/api/v1/cars/${FetchedCar.data[0]._id}`,
+        "PUT",
+        JSON.stringify({
+          charger_note: fields.charger_note,
+        }),
+        { "Content-Type": "application/json" }
+      );
+      console.log("responseData ", responseData);
+      props.setUpdatedCar(true);
+    } catch (err) {
+      console.log({ err });
     }
-    // .then((json) => console.log(json));
   };
+
   return (
     <>
       <div style={{}}>
@@ -87,19 +96,94 @@ function HomePageComponent(props) {
 
               {FetchedCar?.data[0] && needsMaintenance(FetchedCar?.data[0]) && (
                 <>
+                  <div
+                    style={{
+                      width: "80%",
+                      margin: "auto",
+                      marginBottom: "50px",
+                    }}
+                  >
+                    <Formik
+                      initialValues={{
+                        charger_note: "",
+                        maintenance_period: 10,
+                      }}
+                      // validationSchema={Yup.object().shape({
+                      //     firstName: Yup.string().required('First Name is required'),
+                      //     lastName: Yup.string().required('Last Name is required'),
+                      //     email: Yup.string().email('Email is invalid') .required('Email is required'),
+
+                      // })}
+                      onSubmit={(fields) => {
+                        // alert('SUCCESS!! :-)\n\n' + JSON.stringify(fields, null, 4))
+
+                        submit_form(fields);
+                      }}
+                      render={({ errors, status, touched }) => (
+                        <Form>
+                          <div md="12">
+                            <label className="form_text form_label">
+                              Charger Note
+                            </label>
+                          </div>
+                          <div md="12" className="mb-3">
+                            <Field
+                              style={{ height: "150px" }}
+                              name={`charger_note`}
+                              className="form-control in_field"
+                              as="textarea"
+                            ></Field>
+                            {/* <ErrorMessage name='birth_date' component={TextError} /> */}
+                          </div>
+
+                          <div>
+                            <Button
+                              style={{
+                                height: "50px",
+                                width: "100%",
+                                fontSize: "20px",
+                                marginTop: "20px",
+                              }}
+                              color="primary"
+                              type="submit"
+                            >
+                              Add note
+                            </Button>
+                          </div>
+
+                          <div>{error}</div>
+                        </Form>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <Label style={{ marginRight: "20px" }}>
+                      Dispenser Number{" "}
+                    </Label>
+
+                    <select
+                      style={{ width: "100px", fontSize: "30px" }}
+                      value={dispenserNo}
+                      onChange={(e) => setDispenserNo(e.target.value)}
+                    >
+                      {[
+                        { value: "1", label: "1" },
+                        { value: "2", label: "2" },
+                        { value: "3", label: "3" },
+                        { value: "4", label: "4" },
+                      ].map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <Button
                     style={{ height: "50px", width: "80%", marginTop: "20px" }}
                     color="success"
                     onClick={onOpenDispenser}
                   >
-                    Open Dispenser
-                  </Button>
-                  <Button
-                    style={{ height: "50px", width: "80%", marginTop: "20px" }}
-                    color="warning"
-                    onClick={onCloseDispenser}
-                  >
-                    Close Dispenser
+                    Open Dispenser {dispenserNo}
                   </Button>
                 </>
               )}
