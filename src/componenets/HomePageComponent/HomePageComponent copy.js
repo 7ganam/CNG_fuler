@@ -1,13 +1,14 @@
 import React from "react";
 import { Container, Row, Col, Label } from "reactstrap";
 import "./HomePageComponent.css";
+import NewCarFormComponent from "./NewCarFormComponent/NewCarFormComponent";
 import { useHttpClient } from "../hooks/useHttpClient";
 import { useEffect, useState } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import moment from "moment";
 import { Alert } from "reactstrap";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import CarPlateComponent from "./CarPlateComponent/CarPlateComponent";
+
 import QrComponent from "./QrComponent/QrComponent";
 
 const DispenserIp = "192.168.0.12";
@@ -20,7 +21,6 @@ function HomePageComponent(props) {
   const [FetchedCarError, setFetchedCarError] = useState(null);
   const [ScannedQr, setScannedQr] = useState(null);
   const [UpdatedCar, setUpdatedCar] = useState(null);
-  const [carPlateIsRight, setCarPlateIsRight] = useState(false);
 
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
@@ -30,11 +30,10 @@ function HomePageComponent(props) {
     setFetchedCar(null);
     setScannedQr(null);
     setUpdatedCar(null);
-    setCarPlateIsRight(false);
   };
 
   const Find_maint_state = (car) => {
-    let str = car?.maintenances[car.maintenances.length - 1];
+    let str = car.maintenances[car.maintenances.length - 1];
     let date = moment(str);
 
     //calculating reamaing days for maintainance
@@ -48,7 +47,7 @@ function HomePageComponent(props) {
   };
 
   const needsMaintenance = (car) => {
-    let str = car?.maintenances[car.maintenances.length - 1];
+    let str = car.maintenances[car.maintenances.length - 1];
     let date = moment(str);
 
     //calculating reamaing days for maintainance
@@ -88,32 +87,11 @@ function HomePageComponent(props) {
     }
   };
 
-  const fetchCarByQr = async (qr) => {
-    try {
-      const responseData = await sendRequest(
-        `${process.env.REACT_APP_BACKEND_URL}/api/v1/cars/getcar/${qr}`
-      );
-
-      console.log("responseData", responseData);
-      setFetchedCar(responseData);
-      setFetchedCarError(false);
-    } catch (err) {
-      console.log(err);
-      setFetchedCarError(true);
-    }
-  };
-
-  useEffect(() => {
-    if (ScannedQr) {
-      fetchCarByQr(ScannedQr);
-    }
-  }, [ScannedQr]);
-
   return (
     <>
       <div style={{}}>
         <div>
-          {carPlateIsRight ? (
+          {ScannedQr === FetchedCar?.data[0].qr_str ? (
             <Container className="update_maint_date_container">
               {Find_maint_state(FetchedCar?.data[0])}
 
@@ -128,7 +106,7 @@ function HomePageComponent(props) {
                   >
                     <Formik
                       initialValues={{
-                        charger_note: FetchedCar?.data[0]?.charger_note,
+                        charger_note: "",
                         maintenance_period: 10,
                       }}
                       // validationSchema={Yup.object().shape({
@@ -222,83 +200,83 @@ function HomePageComponent(props) {
             <Container className="Form_container" style={{ marginTop: "0px" }}>
               <Row>
                 <Col xs="12" md="4">
-                  <div className="page_title">Charge A new car</div>
-                  <div className="page_sub_title">Scan QR code on the car</div>
-
-                  <button
-                    className="get_car_button"
-                    style={{
-                      margin: "auto",
-                      width: "200px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setModal(true);
-                    }}
-                  >
-                    Scan QR Code
-                  </button>
+                  <div className="page_title"> Charge check</div>
+                  <div className="page_sub_title">
+                    {" "}
+                    Enter car's plate info then scan the QR code to check the
+                    car's maintenance date
+                  </div>
+                  <NewCarFormComponent
+                    setFetchedCar={setFetchedCar}
+                    setModal
+                    setFetchedCarError={setFetchedCarError}
+                  />
+                </Col>
+                <Col xs="0" md="1"></Col>
+                <Col xs="12" md="7">
                   <div>
+                    {FetchedCar && (
+                      <>
+                        <div
+                          style={{
+                            width: "90%",
+                            marginTop: "30px",
+                            margin: "30px auto 30px auto",
+                          }}
+                        >
+                          <button
+                            className="scan_qr_button"
+                            style={{ width: "100%" }}
+                            color="success"
+                            onClick={toggle}
+                          >
+                            <div style={{ marginLeft: "10px" }}>
+                              {" "}
+                              SCAN QR CODE
+                            </div>
+                            <img
+                              style={{ marginRight: "10px", height: "50px" }}
+                              src="/qr_logo.png"
+                              alt="qr"
+                            />
+                          </button>
+                        </div>
+                        <Modal isOpen={modal} toggle={toggle}>
+                          <ModalHeader toggle={toggle}>
+                            Scan the QR code
+                          </ModalHeader>
+                          <ModalBody>
+                            {!toggle ? (
+                              <div>test</div>
+                            ) : (
+                              <QrComponent
+                                setScannedQr={setScannedQr}
+                                setModal={setModal}
+                              />
+                            )}
+                          </ModalBody>
+                          <ModalFooter>
+                            <Button color="danger" onClick={toggle}>
+                              Cancel
+                            </Button>
+                          </ModalFooter>
+                        </Modal>
+                      </>
+                    )}
+
+                    {ScannedQr && ScannedQr !== FetchedCar?.data[0]?.qr_str && (
+                      <Alert color="danger">
+                        QR doesn't match plate number, the admin was notified by
+                        this incident
+                      </Alert>
+                    )}
+
                     {FetchedCarError && (
-                      <Alert color="danger" style={{ marginTop: "30px" }}>
-                        "couldnt find car in the database"
+                      <Alert color="danger">
+                        Couldn't find car in the database
                       </Alert>
                     )}
                   </div>
-                  <Modal isOpen={modal} toggle={toggle}>
-                    <ModalHeader toggle={toggle}>Scan the QR code</ModalHeader>
-                    <ModalBody>
-                      {!toggle ? (
-                        <div>test</div>
-                      ) : (
-                        <QrComponent
-                          setScannedQr={setScannedQr}
-                          setModal={setModal}
-                        />
-                      )}
-                    </ModalBody>
-                    <ModalFooter>
-                      <Button color="danger" onClick={toggle}>
-                        Cancel
-                      </Button>
-                    </ModalFooter>
-                  </Modal>
-                </Col>
-                <Col xs="0" md="12">
-                  {FetchedCar && (
-                    <>
-                      <CarPlateComponent
-                        plate_no={FetchedCar?.data[0]?.plate_no}
-                        plate_str={FetchedCar?.data[0]?.plate_str}
-                      ></CarPlateComponent>
-                      <Button
-                        style={{
-                          height: "50px",
-                          width: "80%",
-                          marginTop: "20px",
-                        }}
-                        color="success"
-                        onClick={() => {
-                          setCarPlateIsRight(true);
-                        }}
-                      >
-                        number is right
-                      </Button>
-                      <Button
-                        style={{
-                          height: "50px",
-                          width: "80%",
-                          marginTop: "20px",
-                        }}
-                        color="danger"
-                        onClick={() => {
-                          onCancel();
-                        }}
-                      >
-                        number is wrong
-                      </Button>
-                    </>
-                  )}
                 </Col>
               </Row>
             </Container>
